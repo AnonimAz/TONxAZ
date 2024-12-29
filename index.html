@@ -4,19 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Clicker Game</title>
-  <link rel="stylesheet" href="styles.css"> <!-- CSS faylını əlavə edirik -->
-  <script src="https://www.gstatic.com/firebasejs/9.21.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.21.0/firebase-firestore.js"></script>
-</head>
-<body>
-  <div class="container">
-    <h1 class="title">Clicker Game</h1>
-    <p id="username" class="username"></p>
-    <p id="clicks" class="clicks">Click Count: 0</p>
-    <button id="clickButton" class="click-button">Click</button>
-  </div>
+  <link rel="stylesheet" href="styles.css"> <!-- CSS faylını əlavə et -->
+  <script type="module">
+    // Firebase SDK funksiyalarını import edirik
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+    import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-analytics.js";
 
-  <script>
     // Firebase konfiqurasiyası
     const firebaseConfig = {
       apiKey: "AIzaSyBN0GwPPmbCqt_l0wFHiGHuufNW0EwtT50",
@@ -28,43 +22,57 @@
       measurementId: "G-PGTL670602"
     };
 
-    // Firebase tətbiqini başlatmaq
-    const app = firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore(app);
+    // Firebase-i başlatmaq
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);  // Firestore verilənlər bazasına qoşuluruq
+    const analytics = getAnalytics(app);
 
-    // Istifadəçi adı və click sayı
-    let userId = "user123";  // Bu dəyişəni istifadəçi ilə əlaqələndirmək olar
+    let userId = "user123"; // Bu istifadəçinin ID-si ola bilər
     let clicks = 0;
 
-    // Firestore-da istifadəçini tapmaq və məlumatları almaq
-    function getUserData() {
-      const userRef = db.collection('users').doc(userId);
-      userRef.get().then((doc) => {
-        if (doc.exists) {
-          const userData = doc.data();
-          clicks = userData.clicks;
-          document.getElementById("clicks").innerText = "Click Count: " + clicks;
-        } else {
-          // İstifadəçi tapılmadısa, yeni istifadəçi yaradın
-          userRef.set({
-            username: "User123",  // İstifadəçinin adı burada müəyyən edilə bilər
-            clicks: 0,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()  // Yaradılma tarixi
-          });
-          document.getElementById("clicks").innerText = "Click Count: " + clicks;
-        }
-      });
+    // İstifadəçi məlumatlarını almaq
+    async function getUserData() {
+      const userRef = doc(db, 'users', userId);
+      const docSnap = await getDoc(userRef);
+
+      if (docSnap.exists()) {
+        const userData = docSnap.data();
+        clicks = userData.clicks;
+        document.getElementById("clicks").innerText = "Click Count: " + clicks;
+      } else {
+        // İstifadəçi tapılmadısa, yeni istifadəçi yaradılır
+        await setDoc(userRef, {
+          username: "User123",  // Burada istifadəçinin adı yazılır
+          clicks: 0,
+          createdAt: new Date().toISOString()  // Yaradılma tarixi
+        });
+        document.getElementById("clicks").innerText = "Click Count: " + clicks;
+      }
     }
 
-    // Click düyməsi basıldığında `clicks` sayını artırmaq
-    document.getElementById("clickButton").addEventListener("click", () => {
+    // Click düyməsinə basıldığında click sayını artırmaq
+    document.getElementById("clickButton").addEventListener("click", async () => {
       clicks += 1;
-      db.collection('users').doc(userId).update({
+      const userRef = doc(db, 'users', userId);
+      await updateDoc(userRef, {
         clicks: clicks
-      }).then(() => {
-        document.getElementById("clicks").innerText = "Click Count: " + clicks;
       });
+      document.getElementById("clicks").innerText = "Click Count: " + clicks;
     });
+
+    // Səhifə yükləndikdən sonra istifadəçi məlumatlarını çəkmək
+    window.onload = getUserData;
+  </script>
+</head>
+<body>
+  <div class="container">
+    <h1 class="title">Clicker Game</h1>
+    <p id="username" class="username"></p>
+    <p id="clicks" class="clicks">Click Count: 0</p>
+    <button id="clickButton" class="click-button">Click</button>
+  </div>
+</body>
+</html>
 
     // İlk dəfə səhifə yükləndikdə istifadəçi məlumatlarını götürmək
     window.onload = getUserData;
