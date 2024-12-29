@@ -1,0 +1,59 @@
+/* Bütün səhifənin əsas tərtibatı */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f1f1f1;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+  
+  /* Mərkəzləşdirilmiş konteyner */
+  .container {
+    text-align: center;
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Başlıq stilini əlavə et */
+  .title {
+    font-size: 2rem;
+    margin-bottom: 20px;
+    color: #333;
+  }
+  
+  /* İstifadəçi adı */
+  .username {
+    font-size: 1rem;
+    color: #555;
+  }
+  
+  /* Click sayı */
+  .clicks {
+    font-size: 1.2rem;
+    color: #333;
+    margin: 20px 0;
+  }
+  
+  /* Click düyməsi */
+  .click-button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    font-size: 1.2rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  .click-button:hover {
+    background-color: #45a049;
+  }
+  
+  /* Əlavə edilmək üçün digər stil dəyişiklikləri */
+  
