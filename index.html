@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Telegram Clicker Game</title>
+  <script type="module">
+    // Firebase SDK-larını əlavə et
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+    import { getFirestore, collection, doc, setDoc, getDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+
+    // Firebase Konfiqurasiyası
+    const firebaseConfig = {
+      apiKey: "AIzaSyBN0GwPPmbCqt_l0wFHiGHuufNW0EwtT50",
+      authDomain: "tontapbot.firebaseapp.com",
+      projectId: "tontapbot",
+      storageBucket: "tontapbot.firebasestorage.app",
+      messagingSenderId: "871302652341",
+      appId: "1:871302652341:web:b37d27e11ddc2d416bb9fc",
+      measurementId: "G-PGTL670602",
+      databaseURL: "https://tontapbot-default-rtdb.firebaseio.com" // Realtime Database URL
+    };
+
+    // Firebase-i başlat
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // İstifadəçi əlavə etmə funksiyası
+    async function addUser(userId, username) {
+      try {
+        await setDoc(doc(db, "users", userId), {
+          username: username,
+          clicks: 0,
+          createdAt: new Date()
+        });
+        console.log("İstifadəçi uğurla əlavə edildi!");
+      } catch (e) {
+        console.error("İstifadəçi əlavə olunarkən xəta baş verdi:", e);
+      }
+    }
+
+    // İstifadəçi kliklərini saxlama funksiyası
+    async function saveClick(userId, clicks) {
+      const userRef = doc(db, "users", userId);
+      await updateDoc(userRef, {
+        clicks: clicks
+      });
+      console.log("Kliklər uğurla yeniləndi!");
+    }
+
+    // İstifadəçi məlumatlarını oxuma funksiyası (real-time)
+    function readClicks(userId) {
+      const userRef = doc(db, "users", userId);
+      onSnapshot(userRef, (docSnap) => {
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          document.getElementById("clickCount").innerText = data.clicks || 0;
+        } else {
+          console.log("Sənəd tapılmadı!");
+        }
+      });
+    }
+
+    // JavaScript ilə HTML səhifəsinə inteqrasiya
+    document.addEventListener("DOMContentLoaded", () => {
+      const button = document.getElementById("clickButton");
+      const userId = "user123"; // Test üçün istifadəçi ID-si
+      let clicks = 0;
+
+      // Yeni istifadəçi əlavə et (ilk dəfə işlədiləndə)
+      addUser(userId, "User123");
+
+      // Real-time klik sayını oxumağa başla
+      readClicks(userId);
+
+      // Klik düyməsi ilə klik sayını artır
+      button.addEventListener("click", () => {
+        clicks++;
+        saveClick(userId, clicks);  // Klik sayını Firestore-a göndər
+        console.log(`Sən ${clicks} klik etdin!`);
+      });
+    });
+  </script>
+</head>
+<body>
+  <h1>Telegram Clicker Game</h1>
+  <p>Click Count: <span id="clickCount">0</span></p>
+  <button id="clickButton">Click Me!</button>
+</body>
+</html>
