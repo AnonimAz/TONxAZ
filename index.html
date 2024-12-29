@@ -4,14 +4,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Clicker Game</title>
+  <link rel="stylesheet" href="styles.css"> <!-- CSS faylını əlavə edirik -->
   <script src="https://www.gstatic.com/firebasejs/9.21.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.21.0/firebase-firestore.js"></script>
 </head>
 <body>
-  <h1>Clicker Game</h1>
-  <p id="username"></p>
-  <p id="clicks">Click Count: 0</p>
-  <button id="clickButton">Click</button>
+  <div class="container">
+    <h1 class="title">Clicker Game</h1>
+    <p id="username" class="username"></p>
+    <p id="clicks" class="clicks">Click Count: 0</p>
+    <button id="clickButton" class="click-button">Click</button>
+  </div>
 
   <script>
     // Firebase konfiqurasiyası
