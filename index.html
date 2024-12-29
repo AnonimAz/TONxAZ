@@ -3,88 +3,68 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Telegram Clicker Game</title>
-  <script type="module">
-    // Firebase SDK-larını əlavə et
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
-    import { getFirestore, collection, doc, setDoc, getDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+  <title>Clicker Game</title>
+  <script src="https://www.gstatic.com/firebasejs/9.21.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.21.0/firebase-firestore.js"></script>
+</head>
+<body>
+  <h1>Clicker Game</h1>
+  <p id="username"></p>
+  <p id="clicks">Click Count: 0</p>
+  <button id="clickButton">Click</button>
 
-    // Firebase Konfiqurasiyası
+  <script>
+    // Firebase konfiqurasiyası
     const firebaseConfig = {
       apiKey: "AIzaSyBN0GwPPmbCqt_l0wFHiGHuufNW0EwtT50",
       authDomain: "tontapbot.firebaseapp.com",
       projectId: "tontapbot",
-      storageBucket: "tontapbot.firebasestorage.app",
+      storageBucket: "tontapbot.appspot.com",
       messagingSenderId: "871302652341",
       appId: "1:871302652341:web:b37d27e11ddc2d416bb9fc",
-      measurementId: "G-PGTL670602",
-      databaseURL: "https://tontapbot-default-rtdb.firebaseio.com" // Realtime Database URL
+      measurementId: "G-PGTL670602"
     };
 
-    // Firebase-i başlat
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    // Firebase tətbiqini başlatmaq
+    const app = firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore(app);
 
-    // İstifadəçi əlavə etmə funksiyası
-    async function addUser(userId, username) {
-      try {
-        await setDoc(doc(db, "users", userId), {
-          username: username,
-          clicks: 0,
-          createdAt: new Date()
-        });
-        console.log("İstifadəçi uğurla əlavə edildi!");
-      } catch (e) {
-        console.error("İstifadəçi əlavə olunarkən xəta baş verdi:", e);
-      }
-    }
+    // Istifadəçi adı və click sayı
+    let userId = "user123";  // Bu dəyişəni istifadəçi ilə əlaqələndirmək olar
+    let clicks = 0;
 
-    // İstifadəçi kliklərini saxlama funksiyası
-    async function saveClick(userId, clicks) {
-      const userRef = doc(db, "users", userId);
-      await updateDoc(userRef, {
-        clicks: clicks
-      });
-      console.log("Kliklər uğurla yeniləndi!");
-    }
-
-    // İstifadəçi məlumatlarını oxuma funksiyası (real-time)
-    function readClicks(userId) {
-      const userRef = doc(db, "users", userId);
-      onSnapshot(userRef, (docSnap) => {
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          document.getElementById("clickCount").innerText = data.clicks || 0;
+    // Firestore-da istifadəçini tapmaq və məlumatları almaq
+    function getUserData() {
+      const userRef = db.collection('users').doc(userId);
+      userRef.get().then((doc) => {
+        if (doc.exists) {
+          const userData = doc.data();
+          clicks = userData.clicks;
+          document.getElementById("clicks").innerText = "Click Count: " + clicks;
         } else {
-          console.log("Sənəd tapılmadı!");
+          // İstifadəçi tapılmadısa, yeni istifadəçi yaradın
+          userRef.set({
+            username: "User123",  // İstifadəçinin adı burada müəyyən edilə bilər
+            clicks: 0,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()  // Yaradılma tarixi
+          });
+          document.getElementById("clicks").innerText = "Click Count: " + clicks;
         }
       });
     }
 
-    // JavaScript ilə HTML səhifəsinə inteqrasiya
-    document.addEventListener("DOMContentLoaded", () => {
-      const button = document.getElementById("clickButton");
-      const userId = "user123"; // Test üçün istifadəçi ID-si
-      let clicks = 0;
-
-      // Yeni istifadəçi əlavə et (ilk dəfə işlədiləndə)
-      addUser(userId, "User123");
-
-      // Real-time klik sayını oxumağa başla
-      readClicks(userId);
-
-      // Klik düyməsi ilə klik sayını artır
-      button.addEventListener("click", () => {
-        clicks++;
-        saveClick(userId, clicks);  // Klik sayını Firestore-a göndər
-        console.log(`Sən ${clicks} klik etdin!`);
+    // Click düyməsi basıldığında `clicks` sayını artırmaq
+    document.getElementById("clickButton").addEventListener("click", () => {
+      clicks += 1;
+      db.collection('users').doc(userId).update({
+        clicks: clicks
+      }).then(() => {
+        document.getElementById("clicks").innerText = "Click Count: " + clicks;
       });
     });
+
+    // İlk dəfə səhifə yükləndikdə istifadəçi məlumatlarını götürmək
+    window.onload = getUserData;
   </script>
-</head>
-<body>
-  <h1>Telegram Clicker Game</h1>
-  <p>Click Count: <span id="clickCount">0</span></p>
-  <button id="clickButton">Click Me!</button>
 </body>
 </html>
